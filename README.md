@@ -53,10 +53,10 @@ TO DO
 
 **References:**
 
-* ["karpathy/minGPT"](https://github.com/karpathy/minGPT)
-* ["akanyaani/gpt-2-tensorflow2.0"](https://github.com/akanyaani/gpt-2-tensorflow2.0)
 * ["facebookresearch/llama"](https://github.com/facebookresearch/llama/tree/main)
 * ["Huggingface transformers"](https://github.com/huggingface/transformers)
+* ["karpathy/minGPT"](https://github.com/karpathy/minGPT)
+* ["akanyaani/gpt-2-tensorflow2.0"](https://github.com/akanyaani/gpt-2-tensorflow2.0)
 * ["The Illustrated GPT-2 "](https://jalammar.github.io/illustrated-gpt2/)
 
 **Contribution**
