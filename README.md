@@ -4,19 +4,19 @@
 **Setup**
 
 ```
-$ git clone https://github.com/akanyaani/minGPTF
-$ cd minGPTF
-$ python setup.py install
+$ git clone https://github.com/akanyaani/miniLLAMA
+$ cd miniLLAMA
+$ pip install -r requirement.txt
 ```
 
 **Usage**
 
-For generating text using GPT2
+For generating text using trained LLAMA model
 ```
 $ open generate.ipynb
 ```
 
-Here's how you'd instantiate a GPT-2 (124M param version):
+Here's how you'd instantiate a LLAMA model:
 
 ```
 $ from mingptf.model import GPT
