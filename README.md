@@ -55,9 +55,8 @@ TO DO
 
 * ["karpathy/minGPT"](https://github.com/karpathy/minGPT)
 * ["akanyaani/gpt-2-tensorflow2.0"](https://github.com/akanyaani/gpt-2-tensorflow2.0)
-* ["Openai/gpt-2"](https://github.com/openai/gpt-2)
-* ["Huggingface pytorch-transformers"](https://github.com/huggingface/pytorch-transformers)
-* ["Tensorflow Transformers"](https://www.tensorflow.org/beta/tutorials/text/transformer)
+* ["facebookresearch/llama"](https://github.com/facebookresearch/llama/tree/main)
+* ["Huggingface transformers"](https://github.com/huggingface/transformers)
 * ["The Illustrated GPT-2 "](https://jalammar.github.io/illustrated-gpt2/)
 
 **Contribution**
