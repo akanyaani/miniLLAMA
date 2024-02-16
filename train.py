@@ -14,6 +14,7 @@ _ROOT = os.path.abspath(os.path.dirname(__file__))
 LOG_DIR = _ROOT + "/log"
 MODEL_DIR = _ROOT + "/model"
 
+
 _ROOT = os.path.abspath(os.path.dirname(__file__))
 BPE_MODEL_PATH = _ROOT + "/model/tokenizer.model"
 tokenizer = SentencePieceProcessor(model_file=BPE_MODEL_PATH)
