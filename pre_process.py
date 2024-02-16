@@ -3,6 +3,7 @@ import click
 import sentencepiece as spm
 from datasets import load_dataset
 
+
 num_proc_load_dataset = 4
 # Just downloading 5% of data for faster process
 dataset = load_dataset("openwebtext", split="train[:5%]", num_proc=num_proc_load_dataset)
