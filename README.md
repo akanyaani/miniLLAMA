@@ -28,13 +28,13 @@ $ model = GPT(model_config)
 
 And here's how you'd train it:
 ```
-$ from mingptf.model import GPT
-$ model_config = GPT.get_default_config()
+$ from minllama.model import LLAMA
+$ model_config = LLAMA.get_default_config()
 
-$ model_config.model_type = 'gpt-micro'
+$ model_config.model_type = 'LLAMA-micro'
 $ model_config.vocab_size = 50257
 $ model_config.block_size = 128
-$ model = GPT(model_config)
+$ model = LLAMA(model_config)
 
 $ train_config = get_default_train_config()
 $ train_config.learning_rate = 5e-4 # the model we're using is so small that we can go a bit faster
