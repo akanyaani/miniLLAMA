@@ -26,32 +26,20 @@ Options:
 >> python pre_process.py
 ```
 
-Here's how you'd instantiate a LLAMA model:
+Pre-train LLAMA
 
 ```
-$ from mingptf.model import GPT
-$ model_config = GPT.get_default_config()
-$ model_config.vocab_size = 50257 # openai's model vocabulary
-$ model_config.block_size = 1024  # openai's model block_size (i.e. input context length)
-$ model = GPT(model_config)
-```
+$ python train.py --help
 
-And here's how you'd train it:
-```
-$ from minllama.model import LLAMA
-$ model_config = LLAMA.get_default_config()
-
-$ model_config.model_type = 'LLAMA-micro'
-$ model_config.vocab_size = 50257
-$ model_config.block_size = 128
-$ model = LLAMA(model_config)
-
-$ train_config = get_default_train_config()
-$ train_config.learning_rate = 5e-4 # the model we're using is so small that we can go a bit faster
-$ train_config.max_iters = 2000
-
-$ model.configure_optimizers(train_config)
-$ model.fit(train_data, test_data, test_freq=5)
+  
+>> python train.py \
+  --num-layers=8 \
+  --num-heads=12 \
+  --hidden-size=768 \
+  --max-seq-len=512 \
+  --vocab-size=32000 \
+  --batch-size=32 \
+  --learning-rate=1e-4
 ```
 
 TO DO
