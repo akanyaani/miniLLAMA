@@ -60,7 +60,7 @@ TO DO
 
 **Contribution**
 
-* Your issues and PRs are always welcome.
+* Contributions and feedback are welcome! Feel free to open issues for suggestions or bug reports, and submit pull requests to improve the project.
 
 **Author**
 
