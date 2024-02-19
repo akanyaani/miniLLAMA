@@ -2,6 +2,9 @@
 
 ![GitHub Logo](assests/llama.jpg)
 
+
+miniLLAMA provides a compact implementation of LLAMA and LLAMA2, making it easier for enthusiasts and learners to grasp the nuances of these architectures. By drawing parallels with MiniGPT, it simplifies the understanding of LLAMA and facilitates experimentation.
+
 **Setup**
 
 ```
