@@ -2,8 +2,6 @@
 
 ![GitHub Logo](assests/llama.jpg)
 
-https://github.com/akanyaani/miniLLAMA/blob/master/assests/llama.jpg
-
 **Setup**
 
 ```
