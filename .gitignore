@@ -4,9 +4,11 @@ __pycache__/
 
 # C extensions
 *.so
-
+*processed.txt
+*tokenizer.model
+*tokenizer.vocab
 .DS_Store
-
+*bpe_spm.tsv
 .DS_Store/
 .idea/
 # Distribution / packaging
