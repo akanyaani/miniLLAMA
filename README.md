@@ -2,6 +2,7 @@
 
 ![GitHub Logo](assests/llama.jpg)
 
+miniLLAMA is a concise implementation showcasing the LLAMA and LLAMA2 architectures. Inspired by Andrej Karpathy's MiniGPT, this project aims to elucidate the nuances of LLAMA architecture and its distinctions from GPT.
 
 miniLLAMA provides a compact implementation of LLAMA and LLAMA2, making it easier for enthusiasts and learners to grasp the nuances of these architectures. By drawing parallels with MiniGPT, it simplifies the understanding of LLAMA and facilitates experimentation.
 
