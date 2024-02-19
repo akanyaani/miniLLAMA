@@ -9,6 +9,7 @@ from torch.nn.utils import clip_grad_norm_
 from torch.nn.utils.rnn import pad_sequence
 from model import *
 import wandb
+import json
 
 _ROOT = os.path.abspath(os.path.dirname(__file__))
 LOG_DIR = _ROOT + "/log"
@@ -148,8 +149,10 @@ def train(num_layers, hidden_size, num_heads, max_seq_len, vocab_size,
             wandb.log({"Val Loss": total_loss, "Val Perplexity": perplexity}, step=epoch)
             del total_loss
             del perplexity
-    model_save_path = MODEL_DIR + "/llama"
+    model_save_path = MODEL_DIR + "/llama.bin"
     torch.save(model.state_dict(), model_save_path)
+    with open(MODEL_DIR+'config.json', 'w') as f:
+        json.dump(config, f)
 
 
 if __name__ == "__main__":
