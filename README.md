@@ -47,7 +47,8 @@ $ python train.py --help
 
 TO DO
 ```
-1. Loading pre-trained weights by META 
+1. Loading pre-trained weights by META.
+2. Multi-GPU support
 3. SFT wrapper.
 ```
 
