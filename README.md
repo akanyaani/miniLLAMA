@@ -44,9 +44,8 @@ $ python train.py --help
 
 TO DO
 ```
-1. Tensorfboard loging.
-2. Mixed precison training.
-3. Fine-Tuning wrapper.
+1. Loading pre-trained weights by META 
+3. SFT wrapper.
 ```
 
 **References:**
