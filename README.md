@@ -1,4 +1,4 @@
-# minLLAMA
+# miniLLAMA
 
 ![GitHub Logo](assests/llama.jpg)
 
