@@ -46,6 +46,18 @@ $ python train.py --help
   --batch-size=32 \
   --learning-rate=1e-4
 ```
+Generate text after pre-training LLAMA model.
+
+```
+>> model = LLAMA(config)
+>> model.load_state_dict(torch.load("/model_path/llama"))
+>> model.eval()
+>> from sentencepiece import SentencePieceProcessor
+>> tokenizer = SentencePieceProcessor(model_file="/model_path/tokenizer.model")
+
+prompt = "how are you"
+generate(prompt, tokenizer)
+```
 
 TO DO
 ```
