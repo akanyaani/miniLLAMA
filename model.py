@@ -221,13 +221,22 @@ class LLAMA(nn.Module):
             torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
 
     @torch.no_grad()
-    def generate(self, idx, max_new_tokens, temperature=1.0, top_k=None):
-        """
-        will be pushing this by 20th Feb
-        :param idx:
-        :param max_new_tokens:
-        :param temperature:
-        :param top_k:
-        :return:
-        """
-        pass
+    def generate(self, prompt, tokenizer, max_new_tokens=64, temperature=1.0, top_k=None):
+        # [BOS] index is 3 and [EOS] index is 4
+
+        input_ids = torch.tensor([[3] + tokenizer.EncodeAsIds(prompt)])
+        for _ in range(max_new_tokens):
+            logits, _ = self(input_ids)
+            logits = logits[:, -1, :] / temperature
+            if top_k is not None:
+                v, _ = torch.topk(logits, min(top_k, logits.size(-1)))
+                logits[logits < v[:, [-1]]] = -float('Inf')
+            probs = F.softmax(logits, dim=-1)
+            predicted_id = torch.multinomial(probs, num_samples=1)
+            input_ids = torch.cat((input_ids, predicted_id), dim=1)
+
+            if predicted_id == 4:
+                break
+
+        input_ids = input_ids[0]
+        return tokenizer.decode_ids(input_ids.cpu().numpy().tolist()[1:])

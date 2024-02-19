@@ -31,7 +31,7 @@ def preprocess(doc, max_length=512):
 
     #     inputs = [inputs + [tokenizer.pad_id()] * (max_length - len(inputs))]
     #     targets = [targets + [tokenizer.pad_id()] * (max_length - len(targets))]
-    return inputs[:512], targets[:512]
+    return inputs[:max_length], targets[:max_length]
 
 
 class CustomDataset(Dataset):
@@ -65,7 +65,7 @@ def create_dataloader(dataset, batch_size):
         batch_x, batch_y = zip(*batch)
         # Pad sequences in each batch
         batch_x = pad_sequence(batch_x, batch_first=True)
-        batch_y = pad_sequence(batch_y, batch_first=True)
+        batch_y = pad_sequence(batch_y, batch_first=True, padding_value=-1)
         return batch_x, batch_y
 
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
