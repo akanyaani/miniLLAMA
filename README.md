@@ -1,5 +1,6 @@
 # minLLAMA
 
+![miniLLAMA](assets/image.jpg)
 
 **Setup**
 
