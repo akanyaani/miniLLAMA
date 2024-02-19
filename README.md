@@ -9,11 +9,21 @@ $ cd miniLLAMA
 $ pip install -r requirement.txt
 ```
 
-**Usage**
+You can pre-train the model using sample data available in repository or you can download the data using this github repo https://github.com/eukaryote31/openwebtext
 
-For generating text using trained LLAMA model
+Pre-Training model on sample data available in repository
 ```
-$ open generate.ipynb
+$ python pre_process.py --help
+
+Options:
+  --data-dir TEXT        training data path  [default: /data/scraped]
+  --vocab-size INTEGER   byte pair vocab size  [default: 24512]
+  --min-seq-len INTEGER  minimum sequence length  [default: 15]
+  --max-seq-len INTEGER  maximum sequence length  [default: 512]
+  --help                 Show this message and exit.
+  
+  
+>> python pre_process.py
 ```
 
 Here's how you'd instantiate a LLAMA model:
