@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 import math
+from utils import create_masks
 
 
 class RMSNorm(nn.Module):
@@ -27,10 +28,10 @@ class FeedForward(nn.Module):
         super().__init__()
         self.config = config
         self.intermediate_size = int(
-            4 * self.config.hidden_dim * (2 / 3))  # https://arxiv.org/pdf/2302.13971.pdf PAGE 3
-        self.c_fc = nn.Linear(self.hidden_size, self.intermediate_size, bias=False)
-        self.v_proj = nn.Linear(self.hidden_size, self.intermediate_size, bias=False)
-        self.c_proj = nn.Linear(self.intermediate_size, self.hidden_size, bias=False)
+            4 * self.config["hidden_size"] * (2 / 3))  # https://arxiv.org/pdf/2302.13971.pdf PAGE 3
+        self.c_fc = nn.Linear(self.config["hidden_size"], self.intermediate_size, bias=False)
+        self.v_proj = nn.Linear(self.config["hidden_size"], self.intermediate_size, bias=False)
+        self.c_proj = nn.Linear(self.intermediate_size, self.config["hidden_size"], bias=False)
 
     def forward(self, x):
         x = F.silu(self.c_fc(x)) * self.v_proj(x)
@@ -82,8 +83,13 @@ class Attention(nn.Module):
         super().__init__()
         self.config = config
 
-        self.n_rep = self.n_local_heads // self.n_local_kv_heads
-        self.head_dim = config.n_head
+        self.n_rep = self.config["n_local_heads"] // self.config["n_local_kv_heads"]
+        self.num_heads = config["n_head"]
+        self.hidden_size = config["hidden_size"]
+        self.head_dim = self.hidden_size // self.num_heads
+        self.num_key_value_heads = config["num_key_value_heads"]
+        self.num_key_value_groups = self.num_heads // self.num_key_value_heads
+        self.attention_dropout = self.config["attention_dropout"]
 
         self.wq = nn.Linear(self.hidden_size, self.num_heads * self.head_dim, bias=False)
         self.wk = nn.Linear(self.hidden_size, self.num_key_value_heads * self.head_dim, bias=False)
@@ -93,12 +99,15 @@ class Attention(nn.Module):
 
         self.rotary_emb = RotaryEmbedding(
             self.head_dim,
-            max_position_embeddings=self.max_position_embeddings,
-            base=self.rope_theta,
+            max_position_embeddings=config["max_len"],
+            base=config["rope_theta"]
         )
 
-    def forward(self, x, position_ids, mask):
+    def forward(self, x, mask=None, training=False):
         B, T, C = x.size()  # batch size, sequence length, embedding dimensionality (n_embd)
+
+        position_ids = torch.arange(T, device=x.device).repeat([B, 1]).long()
+        # print("++++++++",position_ids)
 
         q = self.wq(x)
         k = self.wk(x)
@@ -108,15 +117,20 @@ class Attention(nn.Module):
         k = k.view(B, T, self.num_key_value_heads, self.head_dim).transpose(1, 2)
         v = v.view(B, T, self.num_key_value_heads, self.head_dim).transpose(1, 2)
 
+        #         print("q++++++++", q.shape)
+
         cos, sin = self.rotary_emb(v, position_ids, seq_len=None)
         q, k = apply_rotary_pos_emb(q, k, cos, sin, None)
 
         k = repeat_kv(k, self.num_key_value_groups)
         v = repeat_kv(v, self.num_key_value_groups)
 
-        attn_weights = torch.matmul(q, k.transpose(2, 3)) / math.sqrt(self.head_dim)
-        # upcast attention to fp32
-        attn_scores = F.softmax(attn_weights, dim=-1)
+        matmul_qk = torch.matmul(q, k.transpose(2, 3)) / math.sqrt(self.head_dim)
+        if mask is not None:
+            matmul_qk += (mask * -1e9)
+
+        attn_scores = F.softmax(matmul_qk, dim=-1)
+        # print("attn_scores", attn_scores)
         attn_scores = F.dropout(attn_scores, p=self.attention_dropout, training=self.training)
         y = torch.matmul(attn_scores, v)  # Weighted sum
 
@@ -129,13 +143,13 @@ class DecoderBlock(nn.Module):
 
     def __init__(self, config):
         super().__init__()
-        self.ln_1 = RMSNorm(config.n_embd, bias=config.bias)
+        self.ln_1 = RMSNorm(config["n_embd"], eps=config["eps"])
         self.attn = Attention(config)
-        self.ln_2 = RMSNorm(config.n_embd, bias=config.bias)
+        self.ln_2 = RMSNorm(config["n_embd"], eps=config["eps"])
         self.mlp = FeedForward(config)
 
-    def forward(self, x):
-        x = x + self.attn(self.ln_1(x))
+    def forward(self, x, mask):
+        x = x + self.attn(self.ln_1(x), mask=mask)
         x = x + self.mlp(self.ln_2(x))
         return x
 
@@ -144,23 +158,24 @@ class LLAMA(nn.Module):
 
     def __init__(self, config):
         super().__init__()
-        assert config.vocab_size is not None
-        assert config.block_size is not None
+        assert config["vocab_size"] is not None
+        assert config["block_size"] is not None
         self.config = config
 
-        self.vocab_size = config.vocab_size
+        self.vocab_size = config["vocab_size"]
 
         self.transformer = nn.ModuleDict(dict(
-            embedding_layer=nn.Embedding(config.vocab_size, config.hidden_size),
-            h=nn.ModuleList([DecoderBlock(config) for _ in range(config.n_layer)]),
-            layer_norm=RMSNorm(config.hidden_size, eps=config.rms_norm_eps),
+            embedding_layer=nn.Embedding(self.vocab_size, config["hidden_size"]),
+            h=nn.ModuleList([DecoderBlock(config) for _ in range(config["n_layer"])]),
+            layer_norm=RMSNorm(config["hidden_size"], eps=config["rms_norm_eps"]),
         ))
-        self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
+        self.lm_head = nn.Linear(config["hidden_size"], config["vocab_size"], bias=False)
         self.transformer.embedding_layer.weight = self.lm_head.weight
         print("number of parameters: %.2fM" % (self.get_num_params() / 1e6,))
 
     def get_num_params(self, non_embedding=True):
         """
+        taken this method from Andrej karpathy minGPT
         Return the number of parameters in the model.
         For non-embedding count (default), the position embeddings get subtracted.
         The token embeddings would too, except due to the parameter sharing these
@@ -168,19 +183,22 @@ class LLAMA(nn.Module):
         """
         n_params = sum(p.numel() for p in self.parameters())
         if non_embedding:
-            n_params -= self.transformer.wpe.weight.numel()
+            n_params -= self.transformer.embedding_layer.weight.numel()
         return n_params
 
     def forward(self, idx, targets=None):
         device = idx.device
         b, t = idx.size()
-        assert t <= self.config.block_size, f"Cannot forward sequence of length {t}, block size is only {self.config.block_size}"
+
+        mask = create_masks(idx, device)  # Creating mask to handle left to right attention and mask
+        # print("mask+++++++++++++", mask)
+
         pos = torch.arange(0, t, dtype=torch.long, device=device)  # shape (t)
 
         x = self.transformer.embedding_layer(idx)  # token embeddings of shape (b, t, embd)
 
         for decoder_block in self.transformer.h:
-            x = decoder_block(x)
+            x = decoder_block(x, mask)
         x = self.transformer.layer_norm(x)
 
         if targets is not None:
@@ -194,31 +212,13 @@ class LLAMA(nn.Module):
 
         return logits, loss
 
-    def configure_optimizers(self, weight_decay, learning_rate, betas, device_type):
-        # start with all of the candidate parameters
-        param_dict = {pn: p for pn, p in self.named_parameters()}
-        # filter out those that do not require grad
-        param_dict = {pn: p for pn, p in param_dict.items() if p.requires_grad}
-        # create optim groups. Any parameters that is 2D will be weight decayed, otherwise no.
-        # i.e. all weight tensors in matmuls + embeddings decay, all biases and layernorms don't.
-        decay_params = [p for n, p in param_dict.items() if p.dim() >= 2]
-        nodecay_params = [p for n, p in param_dict.items() if p.dim() < 2]
-        optim_groups = [
-            {'params': decay_params, 'weight_decay': weight_decay},
-            {'params': nodecay_params, 'weight_decay': 0.0}
-        ]
-        num_decay_params = sum(p.numel() for p in decay_params)
-        num_nodecay_params = sum(p.numel() for p in nodecay_params)
-        print(f"num decayed parameter tensors: {len(decay_params)}, with {num_decay_params:,} parameters")
-        print(f"num non-decayed parameter tensors: {len(nodecay_params)}, with {num_nodecay_params:,} parameters")
-        # Create AdamW optimizer and use the fused version if it is available
-        fused_available = 'fused' in inspect.signature(torch.optim.AdamW).parameters
-        use_fused = fused_available and device_type == 'cuda'
-        extra_args = dict(fused=True) if use_fused else dict()
-        optimizer = torch.optim.AdamW(optim_groups, lr=learning_rate, betas=betas, **extra_args)
-        print(f"using fused AdamW: {use_fused}")
-
-        return optimizer
+    def _init_weights(self, module):
+        if isinstance(module, nn.Linear):
+            torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
+            if module.bias is not None:
+                torch.nn.init.zeros_(module.bias)
+        elif isinstance(module, nn.Embedding):
+            torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
 
     @torch.no_grad()
     def generate(self, idx, max_new_tokens, temperature=1.0, top_k=None):
