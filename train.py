@@ -80,7 +80,7 @@ def create_dataloader(dataset, batch_size):
 @click.option('--vocab-size', type=int, default=32000, show_default=True, help="Vocab size")
 @click.option('--batch-size', type=int, default=2, show_default=True, help="optimizer type")
 @click.option('--learning-rate', type=float, default=0.0001, show_default=True, help="learning rate")
-@click.option('--epoch', type=float, default=10, show_default=True, help="epoch")
+@click.option('--epoch', type=int, default=10, show_default=True, help="epoch")
 def train(num_layers, hidden_size, num_heads, max_seq_len, vocab_size,
           batch_size, learning_rate, epoch):
     tokenizer = SentencePieceProcessor(model_file=_ROOT + "/data/tokenizer.model")
@@ -131,6 +131,7 @@ def train(num_layers, hidden_size, num_heads, max_seq_len, vocab_size,
             del logits
             del perplexity
 
+
         # Evaluation
         print("Running on val data++++++++++++")
         with torch.no_grad():
@@ -147,8 +148,7 @@ def train(num_layers, hidden_size, num_heads, max_seq_len, vocab_size,
             wandb.log({"Val Loss": total_loss, "Val Perplexity": perplexity}, step=epoch)
             del total_loss
             del perplexity
-    model_save_path = MODEL_DIR + "llama"
-    tokenizer
+    model_save_path = MODEL_DIR + "/llama"
     torch.save(model.state_dict(), model_save_path)
 
 
