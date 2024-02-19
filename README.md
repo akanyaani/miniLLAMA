@@ -1,6 +1,6 @@
 # minLLAMA
 
-![miniLLAMA](assets/image.jpg)
+![miniLLAMA]([assets/image.jpg](https://github.com/akanyaani/miniLLAMA/blob/master/assests/llama.jpg))
 
 **Setup**
 
