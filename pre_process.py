@@ -13,7 +13,9 @@ from ftfy import fix_text
 _ROOT = os.path.abspath(os.path.dirname(__file__))
 PROCESS_DATA_PATH = _ROOT + "/data/processed.txt"
 BPE_TSV_PATH = _ROOT + "/data/bpe_spm.tsv"
-BPE_MODEL_PATH = _ROOT + "/data/tokenizer"
+BPE_MODEL_PATH = _ROOT + "/model/tokenizer"
+
+os.makedirs(_ROOT+"/model", exist_ok=True)
 BOS_ID = 3
 EOS_ID = 4
 
@@ -40,7 +42,9 @@ def train_byte_pair_encoding(vocab_size):
         for word in token_dict:
             tsv_output.writerow([word, token_dict[word]])
 
-    spmcmd = '--input={spm_input} --model_prefix={spm_model} --input_format=tsv --vocab_size={vocab_size} --user_defined_symbols=[SEP],[BOS],[EOS] --hard_vocab_limit=false --model_type=bpe --pad_id=0 --unk_id=1 --bos_id=-1 --eos_id=-1 --pad_piece=[PAD] --unk_piece=[UNK]'.format(
+    spmcmd = ('--input={spm_input} --model_prefix={spm_model} --input_format=tsv --vocab_size={vocab_size} '
+              '--user_defined_symbols=[SEP],[BOS],[EOS] --hard_vocab_limit=false --model_type=bpe --pad_id=0 '
+              '--unk_id=1 --bos_id=-1 --eos_id=-1 --pad_piece=[PAD] --unk_piece=[UNK]').format(
         spm_input=BPE_TSV_PATH, spm_model=BPE_MODEL_PATH, vocab_size=vocab_size)
     spm.SentencePieceTrainer.train(spmcmd)
 
