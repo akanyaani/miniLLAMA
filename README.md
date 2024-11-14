@@ -11,7 +11,7 @@ miniLLAMA provides a compact implementation of LLAMA and LLAMA2, making it easie
 ```
 $ git clone https://github.com/akanyaani/miniLLAMA
 $ cd miniLLAMA
-$ pip install -r requirement.txt
+$ pip install -r requirements.txt
 ```
 
 You can pre-train the model using sample data available in repository or you can download the data using this github repo https://github.com/eukaryote31/openwebtext
