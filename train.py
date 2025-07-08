@@ -16,7 +16,7 @@ LOG_DIR = _ROOT + "/log"
 MODEL_DIR = _ROOT + "/model"
 
 _ROOT = os.path.abspath(os.path.dirname(__file__))
-BPE_MODEL_PATH = _ROOT + "/data/tokenizer.model"
+BPE_MODEL_PATH = _ROOT + "/model/tokenizer.model"
 PROCESS_DATA_TXT = _ROOT + "/data/processed.txt"
 tokenizer = SentencePieceProcessor(model_file=BPE_MODEL_PATH)
 print(tokenizer.pad_id())
@@ -84,7 +84,7 @@ def create_dataloader(dataset, batch_size):
 @click.option('--epoch', type=int, default=10, show_default=True, help="epoch")
 def train(num_layers, hidden_size, num_heads, max_seq_len, vocab_size,
           batch_size, learning_rate, epoch):
-    tokenizer = SentencePieceProcessor(model_file=_ROOT + "/data/tokenizer.model")
+    tokenizer = SentencePieceProcessor(model_file=_ROOT + "/model/tokenizer.model")
     dataset = CustomDataset(_ROOT + "/data/processed.txt", tokenizer)
     dataloader = create_dataloader(dataset, batch_size)
 
